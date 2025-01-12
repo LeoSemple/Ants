@@ -28,7 +28,7 @@ for (let i = 0; i < soilNoAcross; i += 1){
 	
 		for (let j = 0; j <	soilNoDown; j += 1){
 		
-		soilHealth[i].push(8)
+			soilHealth[i].push(8)
 		
 		}
 }
@@ -140,9 +140,6 @@ function antGenerator(a, b, c){ //invoke this function every time an ant is to b
 		antPixel.setAttribute("id","Type:" + a + ", No:" + (x + idMax[a]));
 		document.body.appendChild(antPixel);
 		
-		
-
-		
 
 	}
 	
@@ -229,7 +226,6 @@ let otherNodeNo = 8
 let otherHiddenLayerNo = 4
 let otherOutputNo = 3
 
-let otherNodeMatrix = []
 let teamOtherBrain = []
 
 for (let x = 0; x < teamNo; x += 1){
@@ -245,11 +241,11 @@ for (let x = 0; x < teamNo; x += 1){
 		
 		for (let k = 0; k < otherInputNo; k += 1){
 		
-			teamOtherBrain[x].otherNodeMatrix[0][j].push(0.5/otherInputNo - 0.1 + Math.random()/5) //coefficients
+			teamOtherBrain[x].otherNodeMatrix[0][j].push(((Math.random() - 0.5) / (0.5 * Math.sqrt(otherInputNo)))) //coefficients
 		
 		}
 		
-		teamOtherBrain[x].otherNodeMatrix[0][j].push(0.5 - 0.1 + Math.random()/5)//const term
+		teamOtherBrain[x].otherNodeMatrix[0][j].push(Math.random() - 0.5)//const term
 	}
 
 	for (let i = 1; i < otherHiddenLayerNo; i += 1){//fills additional hidden layers of teamOtherBrain[x].otherNodeMatrix IMPORTANT has to be layer (i.e. column) then number (i.e. row) so that each full layer is computed before the next layer starts.
@@ -262,11 +258,11 @@ for (let x = 0; x < teamNo; x += 1){
 			
 			for (let k = 0; k < otherNodeNo; k += 1){
 			
-				teamOtherBrain[x].otherNodeMatrix[i][j].push(0.5/otherNodeNo - 0.1 + Math.random()/5) //coefficients
+				teamOtherBrain[x].otherNodeMatrix[i][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(otherNodeNo))) //coefficients
 			
 			}
 			
-			teamOtherBrain[x].otherNodeMatrix[i][j].push(0.5 - 0.1 + Math.random()/5)//const term
+			teamOtherBrain[x].otherNodeMatrix[i][j].push(Math.random() - 0.5)//const term
 		}
 	}
 
@@ -278,14 +274,15 @@ for (let x = 0; x < teamNo; x += 1){
 		
 		for (let j = 0; j < otherNodeNo; j += 1){
 		
-			teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push(0.5/otherNodeNo - 0.1 + Math.random()/5)//coefficients
+			teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push((Math.random() - 0.5) / (0.5 * Math.sqrt(otherNodeNo)))//coefficients
 		
 		}
 		
-		teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push(0.5 - 0.1 + Math.random()/5)//const term
+		teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push(Math.random() - 0.5)//const term
 	}
 }
 
+console.log("other")
 console.log(teamOtherBrain[0].otherNodeMatrix)
 console.log(teamOtherBrain[1].otherNodeMatrix)
 
@@ -327,7 +324,6 @@ let ownNodeNo = 8
 let ownHiddenLayerNo = 4
 let ownOutputNo = 7// ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
 
-let ownNodeMatrix = []
 let teamOwnBrain = []
 
 for (let x = 0; x < teamNo; x += 1){
@@ -343,11 +339,11 @@ for (let x = 0; x < teamNo; x += 1){
 		
 		for (let k = 0; k < ownInputNo; k += 1){
 		
-			teamOwnBrain[x].ownNodeMatrix[0][j].push(0.5/ownInputNo - 0.1 + Math.random()/5) //coefficients
+			teamOwnBrain[x].ownNodeMatrix[0][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownInputNo))) //coefficients
 		
 		}
 		
-		teamOwnBrain[x].ownNodeMatrix[0][j].push(0.5 - 0.1 + Math.random()/5)//const term
+		teamOwnBrain[x].ownNodeMatrix[0][j].push(Math.random() - 0.5)//const term
 	}
 
 	for (let i = 1; i < ownHiddenLayerNo; i += 1){//fills additional hidden layers of teamOwnBrain[x].ownNodeMatrix IMPORTANT has to be layer (i.e. column) then number (i.e. row) so that each full layer is computed before the next layer starts.
@@ -360,30 +356,31 @@ for (let x = 0; x < teamNo; x += 1){
 			
 			for (let k = 0; k < ownNodeNo; k += 1){
 			
-				teamOwnBrain[x].ownNodeMatrix[i][j].push(0.5/ownNodeNo - 0.1 + Math.random()/5) //coefficients
+				teamOwnBrain[x].ownNodeMatrix[i][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownNodeNo))) //coefficients
 			
 			}
 			
-			teamOwnBrain[x].ownNodeMatrix[i][j].push(0.5 - 0.1 + Math.random()/5)//const term
+			teamOwnBrain[x].ownNodeMatrix[i][j].push(Math.random() - 0.5)//const term
 		}
 	}
 
 	teamOwnBrain[x].ownNodeMatrix.push([])
 
-	for (let i = 0; i < ownOutputNo; i += 1){//fills final layer of teamOwnBrain[x].ownNodeMatrix i.e. outputs. 0 = feed, 1 = attack, 2 = nothing.
+	for (let i = 0; i < ownOutputNo; i += 1){//fills final layer of teamOwnBrain[x].ownNodeMatrix i.e. outputs. // ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
 		
 		teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo].push([])
 		
 		for (let j = 0; j < ownNodeNo; j += 1){
 		
-			teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push(0.5/ownNodeNo - 0.1 + Math.random()/5)//coefficients
+			teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownNodeNo)))//coefficients
 		
 		}
 		
-		teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push(0.5 - 0.1 + Math.random()/5)//const term
+		teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push(Math.random() - 0.5)//const term
 	}
 }
 
+console.log("own")
 console.log(teamOwnBrain[0].ownNodeMatrix)
 console.log(teamOwnBrain[1].ownNodeMatrix)
 
@@ -435,9 +432,6 @@ function antFunction(){
 		
 		}
 	}
-
-
-
 
 	for (let i = 0; i < antTypeNo; i += 1){//fills the positions for all ants this tick (and any other unique properties to be replaced this tick e.g. sight, health?). Would it reduce processing if it instead chooses the first ant of the first type, and performs all functions on it (see, then build, then attack, then move). Then repeats this for the rest of the type 1 ants, then repeats for all of ant type 2 etc. Instead of all ants see, then all build...
 
@@ -560,7 +554,7 @@ function antFunction(){
 		
 		//hidden layers
 		
-		otherNodeOutputs = []
+		let otherNodeOutputs = []
 		
 		otherNodeOutputs.push([])
 		
@@ -657,7 +651,7 @@ function antFunction(){
 	
 
 	let ownBrainUseCount = 0
-	let ownChoice = []//0 = dig, 2 = build, 4 = do nothing
+	let ownChoice = []//ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
 
 	for (let i = 0; i < antTypeNo; i += 1){
 	
@@ -707,11 +701,11 @@ function antFunction(){
 		
 		//hidden layers
 		
-		ownNodeOutputs = []
+		let ownNodeOutputs = []
 		
 		ownNodeOutputs.push([])
 		
-		for (let j = 0; j < ownNodeNo; j += 1){//computes first layer of node vaalues. create a larger first layer????
+		for (let j = 0; j < ownNodeNo; j += 1){//computes first layer of node values. create a larger first layer????
 			
 			ownNodeOutputs[0].push(0)
 			
@@ -778,13 +772,8 @@ function antFunction(){
 		
 		}
 		
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//top move output
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//left move output
-		
-		
-		
-		
-		//link move output to move direction!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//top move output, sigmoid function normalises output to between -1 and 1.
+		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//left move output, sigmoid function normalises output to between -1 and 1.
 		
 		
 		ownBrainUseCount += 1
@@ -831,8 +820,8 @@ function antFunction(){
 				
 			
 				
-				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * 2 * ownChoice[i][j][2]) + "px"
-				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * 2 * ownChoice[i][j][3]) + "px"
+				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][2]) + "px"
+				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][3]) + "px"
 				
 			
 				if (Number(document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.slice(0, document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.length - 2)) < soilDistFromTop){//keeps them trapped in the soil for training purposes. may remove later.
@@ -884,14 +873,14 @@ function antFunction(){
 		
 		for (let i = 0; i < collisionList.length; i += 4){// for feeding ants it collides with
 		
-			if (otherChoice[i + 3] = 1 && otherChoice[i + 2] > 0 && antMatrix[collisionList[i + 2]][collisionList[i + 3]].foodStack >= otherChoice[i + 2]){
+			if (otherChoice[i + 3] == 1 && otherChoice[i + 2] > 0 && antMatrix[collisionList[i + 2]][collisionList[i + 3]].foodStack >= otherChoice[i + 2]){
 			
 			antMatrix[collisionList[i]][collisionList[i + 1]].foodStack += otherChoice[i]
 			antMatrix[collisionList[i + 2]][collisionList[i + 3]].foodStack -= otherChoice[i]
 			
 			}
 			
-			if (otherChoice[i + 1] = 1 && otherChoice[i] > 0 && antMatrix[collisionList[i]][collisionList[i + 1]].foodStack >= otherChoice[i]){
+			if (otherChoice[i + 1] == 1 && otherChoice[i] > 0 && antMatrix[collisionList[i]][collisionList[i + 1]].foodStack >= otherChoice[i]){
 			
 			antMatrix[collisionList[i + 2]][collisionList[i + 3]].foodStack += otherChoice[i]
 			antMatrix[collisionList[i]][collisionList[i + 1]].foodStack -= otherChoice[i]
@@ -932,7 +921,7 @@ function antFunction(){
 							soilMatrix[a][b+1].health)
 	
 					
-					if (ownChoice[i][j][0] >= 3){
+					if (ownChoice[i][j][0] >= 1){
 			
 						soilMatrix[a+1][b+1].health -= antMatrix[i][j].digAbility
 						
@@ -945,7 +934,7 @@ function antFunction(){
 						document.getElementById("Down:" + (a + 1) + ", Across:" + (b + 1)).style.backgroundColor =  "rgb(" + Math.floor(255 - 130 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 160 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 210 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + ")";
 
 			
-					}else if (ownChoice[i][j][0] >= 2){
+					}else if (ownChoice[i][j][0] >= 0){
 			
 						soilMatrix[a][b+1].health -= antMatrix[i][j].digAbility
 						
@@ -958,7 +947,7 @@ function antFunction(){
 						document.getElementById("Down:" + a + ", Across:" + (b + 1)).style.backgroundColor =  "rgb(" + Math.floor(255 - 130 * soilMatrix[a][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 160 * soilMatrix[a][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 210 * soilMatrix[a][b + 1].health/soilHealthMax) + ")";
 
 					
-					}else if (ownChoice[i][j][0] >= 1){
+					}else if (ownChoice[i][j][0] >= -1){
 			
 						soilMatrix[a+1][b].health -= antMatrix[i][j].digAbility
 						
@@ -1014,7 +1003,7 @@ function antFunction(){
 							soilMatrix[a][b+1].health)
 	
 					
-					if (ownChoice[i][j][0] >= 3){
+					if (ownChoice[i][j][0] >= 1){
 			
 						soilMatrix[a+1][b+1].health += antMatrix[i][j].buildAbility
 						
@@ -1027,7 +1016,7 @@ function antFunction(){
 						document.getElementById("Down:" + (a + 1) + ", Across:" + (b + 1)).style.backgroundColor =  "rgb(" + Math.floor(255 - 130 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 160 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 210 * soilMatrix[a + 1][b + 1].health/soilHealthMax) + ")";
 
 			
-					}else if (ownChoice[i][j][0] >= 2){
+					}else if (ownChoice[i][j][0] >= 0){
 			
 						soilMatrix[a][b+1].health += antMatrix[i][j].buildAbility
 						
@@ -1040,7 +1029,7 @@ function antFunction(){
 						document.getElementById("Down:" + a + ", Across:" + (b + 1)).style.backgroundColor =  "rgb(" + Math.floor(255 - 130 * soilMatrix[a][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 160 * soilMatrix[a][b + 1].health/soilHealthMax) + "," + Math.floor(255 - 210 * soilMatrix[a][b + 1].health/soilHealthMax) + ")";
 
 					
-					}else if ((ownChoice[i][j][0] >= 1)){
+					}else if ((ownChoice[i][j][0] >= -1)){
 			
 						soilMatrix[a+1][b].health += antMatrix[i][j].buildAbility
 						
