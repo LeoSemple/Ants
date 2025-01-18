@@ -1,14 +1,16 @@
 //To do:
 //modify other ant brain so only one other regarding act can be performed per ant per tick
-//
+//create cooperative inputs for brains; leave soil scents,
+//ants drop food when they die functionality (what happens if this would exceed soil max food?)- include other ant foodstack in inputs
+//make Seed.js fixed for a given training run.
+//add soil carrying?
+//vary more ant parameters - starve rate, carry capacity...
+//change dig/build location outputs to be more natural.
 
-
-	//compete
-	//queen ant
-	//carry food to queen
-	//different strengths (soil carry, food carry)
-	//resting?
-	//drinking?
+//ant sight?
+//queen ant
+//resting?
+//drinking?
 
 // script structure - all parameters, then all variables, then all functions? Or sort by type; soil paramteres, variables, functions, then ant parameters, variables...?
 
@@ -16,35 +18,24 @@
 
 let foodDeclineRate = 1.5 //rate at which total simulation food disappears. 1 = no decline, > 1 = faster decline.
 
+//EXPORTS
+
+export {soilMatrix, antMatrix, idMax, antTypeNo, topVar, leftVar}
+
+//IMPORTS
+//Seed.js parameters
+
+import {soilHealth, soilFood, soilHealthMax, soilFoodMax, soilDistFromTop, soilNoAcross, soilNoDown, antTypeNo, speedMax, healthMax, foodStackMax, teamNo, speed, health, attackAbility, digAbility, buildAbility, foodStack, starveRate, eatRate, collectRate} from './Seed.js'
+
+//dom functions
+
+import {dom1SoilGenerator, dom1AntGenerator} from './Dom1.js'
+import {dom2Move, dom2Remove} from './Dom2.js'
+
 //SOIL
 
 //soil parameters:
 
-let soilHealth = []
-let soilFood = []
-let soilHealthMax = 10
-let soilFoodMax = 10
-let soilDistFromTop = 200
-let soilNoAcross = 100 // number of soil blocks across the screen
-let soilNoDown = 100 // number of soil blocks down the screen
-let random1 = Math.random()
-let random2 = Math.random()
-
-let soilGeneratorLowerBound = soilHealthMax * Math.min(random1, random2)
-let soilGeneratorUpperBound = soilHealthMax * Math.max(random1, random2)
-//end of soil parameters
-
-for (let i = 0; i < soilNoDown; i += 1){//pushes initial soilFood and soilHealth values
-
-	soilHealth.push([])
-	soilFood.push([])
-	
-	for (let j = 0; j <	soilNoAcross; j += 1){
-		
-		soilHealth[i].push(soilGeneratorLowerBound + Math.random() * (soilGeneratorUpperBound - soilGeneratorLowerBound))
-		soilFood[i].push(Math.random() * soilFoodMax)
-	}
-}
 
 let soilMatrix = []
 
@@ -59,18 +50,6 @@ function soilGenerator(a, b){//invoke at beginning of simulation. a = number acr
 		health: soilHealth[a][b],
 		})
 		
-
-		let soilPixel = document.createElement("div");
-		soilPixel.style.backgroundColor =  "rgb(" + Math.min(255, Math.floor(255 - 130 * soilMatrix[a][b].health/soilHealthMax)) + "," + Math.min(255, Math.floor(255 - 160 * soilMatrix[a][b].health/soilHealthMax)) + "," + Math.min(255, Math.floor(255 - 210 * soilMatrix[a][b].health/soilHealthMax)) + ")";
-		soilPixel.style.top = soilDistFromTop + a*10 + "px";
-		soilPixel.style.left = b*10 + "px";
-		soilPixel.style.height = 10 + "px";
-		soilPixel.style.width = 10 + "px";
-		soilPixel.style.position = "absolute";
-		soilPixel.setAttribute("id","Down:" + a + ", Across:" + b);
-		document.body.appendChild(soilPixel);
-
-
 }
 
 for (let i = 0; i <	soilNoDown; i += 1){
@@ -78,7 +57,7 @@ for (let i = 0; i <	soilNoDown; i += 1){
 	for (let j = 0; j <	soilNoAcross; j += 1){
 
 		soilGenerator(i,j)
-
+		dom1SoilGenerator(i,j)//exclude when training
 	}
 }
 
@@ -94,52 +73,22 @@ for (let i = 0; i <	soilNoDown; i += 1){
 
 //ANTS
 
-//ant parameters:
-let antTypeNo = 10
-let speedMax = 10
-let healthMax = 10
-let foodStackMax = 10
-let teamNo = 4
 
-//the below might vary throughout simulation if parameter values are changed
-let speed = []
-let health = []
-let attackAbility = []
-let digAbility = []
-let buildAbility = []
-let foodStack = []
-let starveRate = 0.01 // could change this to a variable parameter later with a positive minimum value, then add to ant brain.
-let eatRate = 0.01 // ditto
-let collectRate = 0.5 // ditto
-
-for (let i = 0; i < antTypeNo; i += 1){
-
-	speed.push(Math.random() * speedMax)
-	health.push(Math.random() * healthMax)
-	attackAbility.push(Math.random() * 5)
-	digAbility.push(Math.random())
-	buildAbility.push(Math.random())
-	foodStack.push(Math.random() * foodStackMax)
-
-}
 //end of ant parameters
 
 let antMatrix = []
 let idMax = []
+let topVar = []
+let leftVar = []
 
 for (let i = 0; i < antTypeNo; i += 1){
 
 	antMatrix.push([])
 	idMax.push(0)
-	
+	topVar.push([])
+	leftVar.push([])
+
 }
-
-
-
-
-
-
-
 
 function antGenerator(a, b, c){ //invoke this function every time an ant is to be created. a = ant type. b = number of ants of that type to be generated. c = team of ant.
 	
@@ -156,22 +105,15 @@ function antGenerator(a, b, c){ //invoke this function every time an ant is to b
 		foodStack: foodStack[a]
 		})
 		
+		topVar[a].push(soilNoDown * 10 / 2 - 200 + soilDistFromTop + (1 - 2 * (antMatrix[a][x + idMax[a]].team % 2)) * a*20 + 2 * 200 * (antMatrix[a][x + idMax[a]].team % 2))
+		leftVar[a].push(soilNoAcross * 10 / 2 - 200 + x*20 + 200 * Math.floor(antMatrix[a][x + idMax[a]].team / 2))
 
-		let antPixel = document.createElement("div");
-		antPixel.style.backgroundColor = "rgb(" + Math.floor(100) + "," + Math.floor(200 - 30 * antMatrix[a][x + idMax[a]].team) + "," + Math.floor(50 + 50 * antMatrix[a][x + idMax[a]].team) + ")";
-		antPixel.style.top = + soilNoDown * 10 / 2 - 200 + soilDistFromTop + (1 - 2 * (antMatrix[a][x + idMax[a]].team % 2)) * a*20 + 2 * 200 * (antMatrix[a][x + idMax[a]].team % 2) + "px";
-		antPixel.style.left = soilNoAcross * 10 / 2 - 200 + x*20 + 200 * Math.floor(antMatrix[a][x + idMax[a]].team / 2) + "px";
-		antPixel.style.height = 10 + "px";
-		antPixel.style.width = 10 + "px";
-		antPixel.style.position = "absolute";
-		antPixel.setAttribute("id","Type:" + a + ", No:" + (x + idMax[a]));
-		document.body.appendChild(antPixel);
-		
-
+		dom1AntGenerator(a,x)//exclude when training
 	}
 	
 	idMax[a] += b
 }
+
 
 
 antGenerator(0,10,0)
@@ -440,7 +382,6 @@ console.log(teamOwnBrain[1].ownNodeMatrix)
 
 
 
-
 function antFunction(){
 
 	let totalAntNo = 0
@@ -461,38 +402,6 @@ function antFunction(){
 				soilFood[i][j] = Math.min(soilFood[i][j] + starveRate/foodDeclineRate, soilFoodMax)//can change when they no longer need to be exterminated
 
 			}
-		}
-	}
-
-	let topVar = []
-	let leftVar = []
-	let foodChange = []//for use in antEat() function.
-
-	for (let i = 0; i < antTypeNo; i += 1){
-
-		topVar.push([])
-		leftVar.push([])
-		foodChange.push([])
-		
-		for (let j = 0; j < antMatrix[i].length; j += 1){
-		
-			topVar[i].push(0)
-			leftVar[i].push(0)
-			foodChange[i].push(0)
-		
-		}
-	}
-
-	for (let i = 0; i < antTypeNo; i += 1){//fills the positions for all ants this tick (and any other unique properties to be replaced this tick e.g. sight, health?). Would it reduce processing if it instead chooses the first ant of the first type, and performs all functions on it (see, then build, then attack, then move). Then repeats this for the rest of the type 1 ants, then repeats for all of ant type 2 etc. Instead of all ants see, then all build...
-
-		for (let j = 0; j < antMatrix[i].length; j += 1){
-				
-			let a = antMatrix[i][j].id
-			
-			topVar[i][j] = Number(document.getElementById("Type:" + i + ", No:" + a).style.top.slice(0, document.getElementById("Type:" + i + ", No:" + a).style.top.length - 2))
-			leftVar[i][j] = Number(document.getElementById("Type:" + i + ", No:" + a).style.left.slice(0, document.getElementById("Type:" + i + ", No:" + a).style.left.length - 2))
-			
-			//ant sight?
 		}
 	}
 
@@ -822,7 +731,7 @@ function antFunction(){
 		
 		}
 		
-		ownChoice[a][b].push(Math.max(0, (2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))))//food collect amount, sigmoid function normalises output to between -1 and 1, and then Math.max() ensures non-negative. Including "5" since output is usually too close to zero otherwise.
+		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//food collect multiplier, sigmoid function normalises output to between -1 and 1. Including "5" since output is usually too close to zero otherwise.
 		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//top move output, sigmoid function normalises output to between -1 and 1. Including "5" since output is usually too close to zero otherwise.
 		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//left move output, sigmoid function normalises output to between -1 and 1. Including "5" since output is usually too close to zero otherwise.
 		
@@ -860,10 +769,19 @@ function antFunction(){
 				let a = Math.floor((topVar[i][j] + 5 - soilDistFromTop) / 10)
 				let b = Math.floor((leftVar[i][j] + 5) / 10)
 				//for collecting food
-				
-				foodChange[i][j] = Math.min(Math.min(soilFood[a][b], collectRate * ownChoice[i][j][2]), foodStackMax - antMatrix[i][j].foodStack)
-				antMatrix[i][j].foodStack += foodChange[i][j]
-				soilFood[a][b] -= foodChange[i][j]
+				if (ownChoice[i][j][2] >= 0){
+
+					let foodChange = Math.min(Math.min(soilFood[a][b], collectRate * ownChoice[i][j][2]), foodStackMax - antMatrix[i][j].foodStack)
+					antMatrix[i][j].foodStack += foodChange
+					soilFood[a][b] -= foodChange
+
+				}else if (ownChoice[i][j][2] < 0){
+
+					let foodChange = Math.min(Math.min(antMatrix[i][j].foodStack, - collectRate * ownChoice[i][j][2]), foodStackMax - soilFood[a][b])
+					antMatrix[i][j].foodStack -= foodChange
+					soilFood[a][b] += foodChange
+
+				}
 
 				//for eating
 				if (antMatrix[i][j].foodStack >= eatRate){
@@ -1147,23 +1065,19 @@ function antFunction(){
 		}
 	}
 
-	for (let i = 0; i < antTypeNo; i += 1){//performs DOM changes after movement. Can remove when training. Can insert into above move loop to optimise when not training(?).
-
-		for (let j = 0; j < antMatrix[i].length; j += 1){
-
-			document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = topVar[i][j] + "px"
-			document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = leftVar[i][j] + "px"
-			
-		}
-	}
+	//moves DOM elements
+	dom2Move()
 
 	//removes dead ants. occurs after all other functions to ensure no earlier references to dead ants.
 	for (let i = 0; i < antTypeNo; i += 1){
 
 		for (let j = 0; j < antRemoveMatrix[i].length; j += 1){
 
-			document.getElementById("Type:" + i + ", No:" + antMatrix[i][antRemoveMatrix[i][j]].id).remove()//can remove when training.
+			let x = antRemoveMatrix[i][j]
+			dom2Remove(i,x)
 			antMatrix[i].splice(antRemoveMatrix[i][j], 1)
+			topVar[i].splice(antRemoveMatrix[i][j], 1)
+			leftVar[i].splice(antRemoveMatrix[i][j], 1)
 
 		}
 	}
@@ -1193,7 +1107,10 @@ antGenerator(a,b,c)
 
 }
 
+document.getElementById("generatorButton").onclick = function() {antGeneratorExtra()}
 
 function play(){
 let antFrame = setInterval(antFunction, 1000)
 }
+
+document.getElementById("playButton").onclick = function() {play()}
