@@ -1,4 +1,6 @@
-
+//To do:
+//modify other ant brain so only one other regarding act can be performed per ant per tick
+//
 
 
 	//compete
@@ -7,35 +9,46 @@
 	//different strengths (soil carry, food carry)
 	//resting?
 	//drinking?
-	
+
 // script structure - all parameters, then all variables, then all functions? Or sort by type; soil paramteres, variables, functions, then ant parameters, variables...?
+
+//training parameters
+
+let foodDeclineRate = 1.5 //rate at which total simulation food disappears. 1 = no decline, > 1 = faster decline.
 
 //SOIL
 
 //soil parameters:
 
 let soilHealth = []
+let soilFood = []
 let soilHealthMax = 10
+let soilFoodMax = 10
 let soilDistFromTop = 200
 let soilNoAcross = 100 // number of soil blocks across the screen
 let soilNoDown = 100 // number of soil blocks down the screen
+let random1 = Math.random()
+let random2 = Math.random()
 
+let soilGeneratorLowerBound = soilHealthMax * Math.min(random1, random2)
+let soilGeneratorUpperBound = soilHealthMax * Math.max(random1, random2)
 //end of soil parameters
 
-for (let i = 0; i < soilNoAcross; i += 1){
+for (let i = 0; i < soilNoDown; i += 1){//pushes initial soilFood and soilHealth values
 
 	soilHealth.push([])
+	soilFood.push([])
 	
-		for (let j = 0; j <	soilNoDown; j += 1){
+	for (let j = 0; j <	soilNoAcross; j += 1){
 		
-			soilHealth[i].push(8)
-		
-		}
+		soilHealth[i].push(soilGeneratorLowerBound + Math.random() * (soilGeneratorUpperBound - soilGeneratorLowerBound))
+		soilFood[i].push(Math.random() * soilFoodMax)
+	}
 }
 
 let soilMatrix = []
 
-for (let i = 0; i < soilNoAcross; i += 1){
+for (let i = 0; i < soilNoDown; i += 1){
 	soilMatrix.push([])
 	
 }
@@ -43,7 +56,7 @@ for (let i = 0; i < soilNoAcross; i += 1){
 function soilGenerator(a, b){//invoke at beginning of simulation. a = number across. b = number down.
 
 		soilMatrix[a].push({ //soil object
-		health: soilHealth[0][0],
+		health: soilHealth[a][b],
 		})
 		
 
@@ -89,12 +102,26 @@ let foodStackMax = 10
 let teamNo = 4
 
 //the below might vary throughout simulation if parameter values are changed
-let speed = [5,10,1,2,3,4,5,6,7,8]
-let health = [10,9,8,7,6,5,4,3,2,1]
-let attackAbility = [3,0,1,2,3,4,5,4,3,2]
-let digAbility = [0,.9,.8,.7,.6,.5,.6,.7,.8,.9]
-let buildAbility = [.5,.5,.8,.7,.6,.5,.4,.3,.2,.1]
-let foodStack = [10,9,8,7,6,5,4,3,2,1]
+let speed = []
+let health = []
+let attackAbility = []
+let digAbility = []
+let buildAbility = []
+let foodStack = []
+let starveRate = 0.01 // could change this to a variable parameter later with a positive minimum value, then add to ant brain.
+let eatRate = 0.01 // ditto
+let collectRate = 0.5 // ditto
+
+for (let i = 0; i < antTypeNo; i += 1){
+
+	speed.push(Math.random() * speedMax)
+	health.push(Math.random() * healthMax)
+	attackAbility.push(Math.random() * 5)
+	digAbility.push(Math.random())
+	buildAbility.push(Math.random())
+	foodStack.push(Math.random() * foodStackMax)
+
+}
 //end of ant parameters
 
 let antMatrix = []
@@ -322,7 +349,7 @@ let ownInputNo = 13
 
 let ownNodeNo = 8
 let ownHiddenLayerNo = 4
-let ownOutputNo = 7// ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
+let ownOutputNo = 8// ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = collect food amount, output [5] = nothing, output[6] = top move, output[7] = left move
 
 let teamOwnBrain = []
 
@@ -416,19 +443,42 @@ console.log(teamOwnBrain[1].ownNodeMatrix)
 
 function antFunction(){
 
+	let totalAntNo = 0
+
+	for (let i = 0; i < antTypeNo; i += 1){
+
+		totalAntNo += antMatrix[i].length
+
+	}
+
+	//replenish soilFood
+	for(let i = 0; i < soilNoDown; i += 1){
+
+		for(let j = 0; j < soilNoAcross; j += 1){
+
+			if(Math.random() < totalAntNo/(soilNoAcross * soilNoDown)){// can add more food replenishment when ants do not need to be exterminated.
+
+				soilFood[i][j] = Math.min(soilFood[i][j] + starveRate/foodDeclineRate, soilFoodMax)//can change when they no longer need to be exterminated
+
+			}
+		}
+	}
 
 	let topVar = []
 	let leftVar = []
+	let foodChange = []//for use in antEat() function.
 
 	for (let i = 0; i < antTypeNo; i += 1){
 
 		topVar.push([])
 		leftVar.push([])
+		foodChange.push([])
 		
 		for (let j = 0; j < antMatrix[i].length; j += 1){
 		
 			topVar[i].push(0)
 			leftVar[i].push(0)
+			foodChange[i].push(0)
 		
 		}
 	}
@@ -456,7 +506,7 @@ function antFunction(){
 				
 				if (x == i){
 				
-					for (let y = j + 1; y < antMatrix[x].length; y += 1){ 
+					for (let y = j + 1; y < antMatrix[x].length; y += 1){ //what happens when j = antMatrix[i].length - 1?
 					
 						if (topVar[i][j] - topVar[x][y] <= 10
 							&& topVar[i][j] - topVar[x][y] >= -10
@@ -611,17 +661,17 @@ function antFunction(){
 		if (otherNodeOutputs[otherHiddenLayerNo][0] > otherNodeOutputs[otherHiddenLayerNo][1] && otherNodeOutputs[otherHiddenLayerNo][0] > otherNodeOutputs[otherHiddenLayerNo][2]){
 		
 			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][0])//value of output
-			otherChoice.push(0)//output choice
+			otherChoice.push(0)//output choice (attack)
 		
 		} else if (otherNodeOutputs[otherHiddenLayerNo][1] > otherNodeOutputs[otherHiddenLayerNo][2]){
 		
 			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][1])//value of output
-			otherChoice.push(1)//output choice
+			otherChoice.push(1)//output choice (feed)
 		
 		} else {
 		
 			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][2])//value of output
-			otherChoice.push(2)//output choice
+			otherChoice.push(2)//output choice (do nothing)
 		
 		}
 		
@@ -651,7 +701,7 @@ function antFunction(){
 	
 
 	let ownBrainUseCount = 0
-	let ownChoice = []//ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
+	let ownChoice = []//A 3d array, which gives each antMatrix[i][j] a 5 length array: ownChoice[i][j][0] = position of dig/build or value of nothing output. ownChoice[i][j][1] = dig, build or nothing. ownChoice[i][j][2] = food collect amount. ownChoice[i][j][3] = top move value. ownChoice[i][j][4] = left move value.
 
 	for (let i = 0; i < antTypeNo; i += 1){
 	
@@ -664,7 +714,7 @@ function antFunction(){
 		}
 	}
 
-	function ownAntBrain(a,b){//OTHER ANT BRAIN
+	function ownAntBrain(a,b){
 	
 	//inputs
 
@@ -767,13 +817,14 @@ function antFunction(){
 		
 		} else {
 			
-			ownChoice[a][b].push(ownNodeOutputs[ownHiddenLayerNo][4])//value of nothing output
-			ownChoice[a][b].push(4)//output choice
+			ownChoice[a][b].push(ownNodeOutputs[ownHiddenLayerNo][5])//value of nothing output
+			ownChoice[a][b].push(5)//output choice
 		
 		}
 		
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//top move output, sigmoid function normalises output to between -1 and 1.
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//left move output, sigmoid function normalises output to between -1 and 1.
+		ownChoice[a][b].push(Math.max(0, (2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))))//food collect amount, sigmoid function normalises output to between -1 and 1, and then Math.max() ensures non-negative. Including "5" since output is usually too close to zero otherwise.
+		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][5]))) - 0.5))//top move output, sigmoid function normalises output to between -1 and 1. Including "5" since output is usually too close to zero otherwise.
+		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 5 * ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//left move output, sigmoid function normalises output to between -1 and 1. Including "5" since output is usually too close to zero otherwise.
 		
 		
 		ownBrainUseCount += 1
@@ -798,79 +849,39 @@ function antFunction(){
 
 
 	//END OF ANT BRAIN
-
-
-	for (let i = 0; i < antTypeNo; i += 1){//moves ants. Occurs before other actions in code, but other actions use original topVar leftVar. As such, it is as if movement occured last.
-
-		for (let j = 0; j < antMatrix[i].length; j += 1){
-			
-			function antMove(){
-				
-				let speedMultiplier = 1
-				
-				
-					let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
-					let b = Math.floor((leftVar[i][j]) / 10)
-				
-					speedMultiplier = (1 - Math.max(soilMatrix[a][b].health,
-										soilMatrix[a+1][b].health,
-										soilMatrix[a][b+1].health,
-										soilMatrix[a+1][b+1].health)
-										/ soilHealthMax)
-				
-			
-				
-				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][2]) + "px"
-				document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][3]) + "px"
-				
-			
-				if (Number(document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.slice(0, document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.length - 2)) < soilDistFromTop){//keeps them trapped in the soil for training purposes. may remove later.
-				
-					document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = soilDistFromTop + "px"
-				
-				} else if (Number(document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.slice(0, document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top.length - 2)) >= soilDistFromTop - 10 + soilNoDown * 10){
-				
-					document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = soilDistFromTop - 10 + soilNoDown * 10 - 1 + "px"
-				
-				}
-				
-				if (Number(document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left.slice(0, document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left.length - 2)) < 0){
-				
-					document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = 0 + "px"
-				
-				} else if (Number(document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left.slice(0, document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left.length - 2)) >= soilNoAcross * 10 - 10){
-				
-					document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = soilNoAcross * 10 - 10 - 1 + "px"
-				
-				}
-			}
-			
-			antMove()
-			
-		}
-	}
 	
 
-	function antEat(){//for feeding other ants and eating
+	function antEat(){//for feeding other ants, collecting food and eating
 	
-		for (let i = 0; i < antTypeNo; i += 1){//for feeding itself
+		for (let i = 0; i < antTypeNo; i += 1){//for collecting food and feeding itself
 
 			for (let j = 0; j < antMatrix[i].length; j += 1){
 				
-				if (antMatrix[i][j].foodStack >= 0.01){
+				let a = Math.floor((topVar[i][j] + 5 - soilDistFromTop) / 10)
+				let b = Math.floor((leftVar[i][j] + 5) / 10)
+				//for collecting food
 				
-					antMatrix[i][j].health += 0.01 
-					antMatrix[i][j].foodStack -= 0.01
-					
-					if (antMatrix[i][j].health > healthMax){//ensures ant health does not go above max
-					
-						antMatrix[i][j].health = healthMax
-					
-					}
+				foodChange[i][j] = Math.min(Math.min(soilFood[a][b], collectRate * ownChoice[i][j][2]), foodStackMax - antMatrix[i][j].foodStack)
+				antMatrix[i][j].foodStack += foodChange[i][j]
+				soilFood[a][b] -= foodChange[i][j]
+
+				//for eating
+				if (antMatrix[i][j].foodStack >= eatRate){
+
+					antMatrix[i][j].foodStack -= eatRate
+					antMatrix[i][j].health = Math.min(healthMax, antMatrix[i][j].health + eatRate)//could change. Eating currently heals at the rate of food consumption.
+
+				}else{
+				
+					antMatrix[i][j].health = Math.min(healthMax, antMatrix[i][j].health + antMatrix[i][j].foodStack)//could change. Eating currently heals at the rate of food consumption.
+					antMatrix[i][j].foodStack = 0
+				
 				}
 			}
 		}
+	
 		
+
 		for (let i = 0; i < collisionList.length; i += 4){// for feeding ants it collides with
 		
 			if (otherChoice[i + 3] == 1 && otherChoice[i + 2] > 0 && antMatrix[collisionList[i + 2]][collisionList[i + 3]].foodStack >= otherChoice[i + 2]){
@@ -913,14 +924,7 @@ function antFunction(){
 					
 					let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
 					let b = Math.floor((leftVar[i][j]) / 10)
-					
-					let c = Math.max(soilMatrix[a][b].health,
-							soilMatrix[a+1][b].health,
-							soilMatrix[a][b+1].health,
-							soilMatrix[a+1][b+1].health,
-							soilMatrix[a][b+1].health)
-	
-					
+
 					if (ownChoice[i][j][0] >= 1){
 			
 						soilMatrix[a+1][b+1].health -= antMatrix[i][j].digAbility
@@ -996,13 +1000,6 @@ function antFunction(){
 					let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
 					let b = Math.floor((leftVar[i][j]) / 10)
 					
-					let c = Math.min(soilMatrix[a][b].health,
-							soilMatrix[a+1][b].health,
-							soilMatrix[a][b+1].health,
-							soilMatrix[a+1][b+1].health,
-							soilMatrix[a][b+1].health)
-	
-					
 					if (ownChoice[i][j][0] >= 1){
 			
 						soilMatrix[a+1][b+1].health += antMatrix[i][j].buildAbility
@@ -1064,12 +1061,12 @@ function antFunction(){
 			}
 		}
 	}
-	
 
-	
 	antBuild()
 
-	function antAttack(){//deals damage and then removes any dead ants. Should be last function, so that there are no earlier references to dead ants.
+
+
+	function antAttack(){//deals damage. Should implement ability to only attack one target per tick!
 	
 		for (let i = 0; i < collisionList.length; i += 4){
 		
@@ -1084,56 +1081,104 @@ function antFunction(){
 				antMatrix[collisionList[i + 2]][collisionList[i + 3]].health -= antMatrix[collisionList[i]][collisionList[i + 1]].attackAbility
 			
 			}
-			
-			if (collisionList[i] == collisionList[i + 2] && antMatrix[collisionList[i]][collisionList[i + 1]].health <= 0 && antMatrix[collisionList[i + 2]][collisionList[i + 3]].health <= 0){
-			
-				document.getElementById("Type:" + collisionList[i + 2] + ", No:" + antMatrix[collisionList[i + 2]][collisionList[i + 3]].id).remove()
-				antMatrix[collisionList[i + 2]].splice(collisionList[i + 3],1)
-				
-				document.getElementById("Type:" + collisionList[i] + ", No:" + antMatrix[collisionList[i]][collisionList[i + 1]].id).remove()
-				antMatrix[collisionList[i]].splice(collisionList[i + 1],1)
-			
-			}else {if (antMatrix[collisionList[i]][collisionList[i + 1]].health <= 0){//ideally death function would be after ALL damage is dealt, but then if there are multiple collisions this function would break trying to remove an ant multiple times
-			
-					document.getElementById("Type:" + collisionList[i] + ", No:" + antMatrix[collisionList[i]][collisionList[i + 1]].id).remove()
-					antMatrix[collisionList[i]].splice(collisionList[i + 1],1)
-				
-				}
-				
-				if (antMatrix[collisionList[i + 2]][collisionList[i + 3]].health <= 0){
-				
-					document.getElementById("Type:" + collisionList[i + 2] + ", No:" + antMatrix[collisionList[i + 2]][collisionList[i + 3]].id).remove()
-					antMatrix[collisionList[i + 2]].splice(collisionList[i + 3],1)
-				
-				}
-			}
 		}
 	}
-	
+		
 	antAttack()
 	
+
+	let antRemoveMatrix = []
+
+	for (let i = 0; i < antTypeNo; i += 1){
+
+		antRemoveMatrix.push([])
+	
+	}
+
 	function antStarve(){
 	
 		for (let i = 0; i < antTypeNo; i += 1){
 
-			for (let j = 0; j < antMatrix[i].length; j += 1){
-			
-				//add damage here once food sources have been added to the simulation
-			
+			for (let j = antMatrix[i].length - 1; j >= 0; j -= 1){//ensures reverse order
+				
+				if (antMatrix[i][j].foodStack == 0){
+				
+					antMatrix[i][j].health -= starveRate
+					
+				}
+				
+				if (antMatrix[i][j].health <= 0){ //add ants to remove list in reverse order, including those that have lost health due to attacks.
+				
+					antRemoveMatrix[i].push(j)
+
+				}
 			}
 		}
 	}
 	
-	
 	antStarve()
 
 
-	document.getElementById("para1").innerHTML = "a"
+	for (let i = 0; i < antTypeNo; i += 1){//moves ants. Occurs after other actions which use original topVar leftVar.
+
+		for (let j = 0; j < antMatrix[i].length; j += 1){
+			
+			function antMove(){
+				
+				let speedMultiplier = 1
+				
+				
+				let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
+				let b = Math.floor((leftVar[i][j]) / 10)
+				
+				speedMultiplier = (1 - Math.max(soilMatrix[a][b].health,
+									soilMatrix[a+1][b].health,
+									soilMatrix[a][b+1].health,
+									soilMatrix[a+1][b+1].health)
+									/ soilHealthMax)
+				
+				topVar[i][j] = Math.min(Math.max(topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][3]), soilDistFromTop), soilDistFromTop - 10 + soilNoDown * 10 - 1)
+				leftVar[i][j] = Math.min(Math.max(leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][4]), 0), - 10 + soilNoAcross * 10 - 1)
+				
+			}
+			
+			antMove()
+
+		}
+	}
+
+	for (let i = 0; i < antTypeNo; i += 1){//performs DOM changes after movement. Can remove when training. Can insert into above move loop to optimise when not training(?).
+
+		for (let j = 0; j < antMatrix[i].length; j += 1){
+
+			document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.top = topVar[i][j] + "px"
+			document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).style.left = leftVar[i][j] + "px"
+			
+		}
+	}
+
+	//removes dead ants. occurs after all other functions to ensure no earlier references to dead ants.
+	for (let i = 0; i < antTypeNo; i += 1){
+
+		for (let j = 0; j < antRemoveMatrix[i].length; j += 1){
+
+			document.getElementById("Type:" + i + ", No:" + antMatrix[i][antRemoveMatrix[i][j]].id).remove()//can remove when training.
+			antMatrix[i].splice(antRemoveMatrix[i][j], 1)
+
+		}
+	}
+
+	document.getElementById("para1").innerHTML = antMatrix[0][1].foodStack + "," + antMatrix[0][1].health
 	
+	for (let i = 0; i < soilNoDown; i += 1){
 
+		for (let j = 0; j < soilNoAcross; j += 1){
 
+			document.getElementById("Down:" + i + ", Across:" + j).innerHTML = Math.round(soilFood[i][j])
 
-	//clear collision list????????????????????
+		}
+	}
+
 }
 
 
