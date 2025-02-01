@@ -1,4 +1,5 @@
-import {antMatrix, antTypeNo, topVar, leftVar} from "./Ants.js"
+import {initializer, outitializer, antGenerator, antFunction, antMatrix, antTypeNo, topVar, leftVar, soilMatrix, soilNoDown, soilNoAcross, soilHealthMax} from "./Ants trainer.js"
+export let dom = 0
 
 export function dom2Move(){
 
@@ -16,5 +17,45 @@ export function dom2Move(){
 export function dom2Remove(i,j){
 
     document.getElementById("Type:" + i + ", No:" + antMatrix[i][j].id).remove()//can remove when training.
+
+}
+
+export function dom2Soil(){
+		
+	for (let i = 0; i < soilNoDown; i += 1){
+
+		for (let j = 0; j < soilNoAcross; j += 1){
+
+            document.getElementById("Down:" + i + ", Across:" + j).style.backgroundColor =  "rgb(" + Math.min(255, Math.floor(255 - 130 * soilMatrix[i][j].health/soilHealthMax)) + "," + Math.min(255, Math.floor(255 - 160 * soilMatrix[i][j].health/soilHealthMax)) + "," + Math.min(255, Math.floor(255 - 210 * soilMatrix[i][j].health/soilHealthMax)) + ")";
+
+		}
+	}
+}
+
+export function dom2Testing(){
+
+    
+
+	function antGeneratorExtra(){
+
+	let a = document.getElementById("antGeneratorA").value
+	let b = document.getElementById("antGeneratorB").value
+	let c = document.getElementById("antGeneratorC").value
+
+	antGenerator(a,b,c)
+
+	}
+
+	document.getElementById("generatorButton").onclick = function() {antGeneratorExtra()}
+
+	function playDom(){
+
+        dom = 1
+        outitializer()
+	    setInterval(antFunction, 1000)
+	
+    }
+
+	document.getElementById("playButton").onclick = function() {playDom()}
 
 }

@@ -1037,33 +1037,54 @@ function antFunction(){
 	antStarve()
 
 
-	for (let i = 0; i < antTypeNo; i += 1){//moves ants. Occurs after other actions which use original topVar leftVar.
-
-		for (let j = 0; j < antMatrix[i].length; j += 1){
-			
-			function antMove(){
+		function antMove(){
+			//change so that the order it iterates through ants is random.
+			for (let i = 0; i < antTypeNo; i += 1){//moves ants. Occurs after other actions which use original topVar leftVar.
+	
+				for (let j = 0; j < antMatrix[i].length; j += 1){
+					
+					let speedMultiplier = 1
 				
-				let speedMultiplier = 1
-				
-				
-				let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
-				let b = Math.floor((leftVar[i][j]) / 10)
-				
-				speedMultiplier = (1 - Math.max(soilMatrix[a][b].health,
-									soilMatrix[a+1][b].health,
-									soilMatrix[a][b+1].health,
-									soilMatrix[a+1][b+1].health)
-									/ soilHealthMax)
-				
-				topVar[i][j] = Math.min(Math.max(topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][3]), soilDistFromTop), soilDistFromTop - 10 + soilNoDown * 10 - 1)
-				leftVar[i][j] = Math.min(Math.max(leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][4]), 0), - 10 + soilNoAcross * 10 - 1)
-				
+					let a = Math.floor((topVar[i][j] - soilDistFromTop) / 10)
+					let b = Math.floor((leftVar[i][j]) / 10)
+					
+					speedMultiplier = (1 - Math.max(soilMatrix[a][b].health,
+										soilMatrix[a+1][b].health,
+										soilMatrix[a][b+1].health,
+										soilMatrix[a+1][b+1].health)
+										/ soilHealthMax)
+					
+					let topVarChange = Math.min(Math.max(topVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][3]), soilDistFromTop), soilDistFromTop - 10 + soilNoDown * 10 - 1) - topVar[i][j]
+					let leftVarChange = Math.min(Math.max(leftVar[i][j] + Math.round(speedMultiplier * antMatrix[i][j].speed * ownChoice[i][j][4]), 0), - 10 + soilNoAcross * 10 - 1) - leftVar[i][j]
+					let largest = Math.max(topVarChange, leftVarChange)
+	
+					collisionLoop: for (let count = 0; count < largest; count += 1){
+	
+						for (let x = 0; x < antTypeNo; x += 1){
+	
+							for (let y = 0; y < antMatrix[x].length; y += 1){
+	
+								if (topVar[i][j] - topVar[x][y] <= 10
+									&& topVar[i][j] - topVar[x][y] >= -10
+									&& leftVar[i][j] - leftVar[x][y] <= 10
+									&& leftVar[i][j] - leftVar[x][y] >= -10
+									&& x !== i && y !== j){
+	
+										break collisionLoop
+								
+								}
+							}
+						}
+								
+						topVar[i][j] += Math.round(topVarChange/largest)
+						leftVar[i][j] += Math.round(leftVarChange/largest)
+	
+					}
+				}
 			}
-			
-			antMove()
-
 		}
-	}
+	
+		antMove()	
 
 	//moves DOM elements
 	dom2Move()
