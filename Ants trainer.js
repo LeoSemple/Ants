@@ -1,4 +1,4 @@
-//To dooooooooooooooo:
+//To do:
 //modify other ant brain so only one other regarding act can be performed per ant per tick?
 //create cooperative inputs for brains; leave soil scents,
 //ants drop food when they die functionality (what happens if this would exceed soil max food?)- include other ant foodstack in inputs
@@ -51,19 +51,10 @@ let queen = []//edit with proper queen values
 let totalAntNo = 0
 let lastTeam = -1
 
-
-//brain node matrices reset in the intiializer (for first round of training)
-
-let otherInputNo = 16
-let otherOutputNo = 3
-let otherHiddenLayerNo = 1
-let otherNodeNo = Math.round((otherInputNo + otherOutputNo) / 2)
 let teamOtherBrain = []
 
-let ownInputNo = 19
-let ownOutputNo = 10// ouput[0] = dig, output[1] = dig top, output[2] = dig left, output[3] = build, output[4] = build top, output[5] = build left, output[6] = collect food amount, output[7]  = nothing, output[8] = top move, output[9] = left move
-let ownHiddenLayerNo = 1
-let ownNodeNo = Math.round((ownInputNo + ownOutputNo) / 2)
+// own outputs ouput[0] = dig, output[1] = dig top, output[2] = dig left, output[3] = build, output[4] = build top, output[5] = build left, output[6] = collect food amount, output[7]  = nothing, output[8] = top move, output[9] = left move
+
 let teamOwnBrain = []
 
 let teamValue = []
@@ -135,213 +126,7 @@ function eggGenerator(a,b,c){
 
 }
 
-function brainGenerator(x){
-
-	teamOtherBrain.push({
-		otherNodeMatrix: []})
-
-	teamOtherBrain[x].otherNodeMatrix.push([])
-
-	for (let j = 0; j < otherNodeNo; j += 1){//fills first layer of teamOtherBrain[x].otherNodeMatrix
-
-		teamOtherBrain[x].otherNodeMatrix[0].push([])
-		
-		for (let k = 0; k < otherInputNo; k += 1){
-		
-			teamOtherBrain[x].otherNodeMatrix[0][j].push(((Math.random() - 0.5) / (0.5 * Math.sqrt(otherInputNo)))) //coefficients
-		
-		}
-		
-		teamOtherBrain[x].otherNodeMatrix[0][j].push(Math.random() - 0.5)//const term
-	}
-
-	for (let i = 1; i < otherHiddenLayerNo; i += 1){//fills additional hidden layers of teamOtherBrain[x].otherNodeMatrix IMPORTANT has to be layer (i.e. column) then number (i.e. row) so that each full layer is computed before the next layer starts.
-
-		teamOtherBrain[x].otherNodeMatrix.push([])
-
-		for (let j = 0; j < otherNodeNo; j += 1){//fills first layer of teamOtherBrain[x].otherNodeMatrix
-
-			teamOtherBrain[x].otherNodeMatrix[i].push([])
-			
-			for (let k = 0; k < otherNodeNo; k += 1){
-			
-				teamOtherBrain[x].otherNodeMatrix[i][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(otherNodeNo))) //coefficients
-			
-			}
-			
-			teamOtherBrain[x].otherNodeMatrix[i][j].push(Math.random() - 0.5)//const term
-		}
-	}
-
-	teamOtherBrain[x].otherNodeMatrix.push([])
-
-	for (let i = 0; i < otherOutputNo; i += 1){//fills final layer of teamOtherBrain[x].otherNodeMatrix i.e. outputs. 0 = feed, 1 = attack, 2 = nothing.
-		
-		teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo].push([])
-		
-		for (let j = 0; j < otherNodeNo; j += 1){
-		
-			teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push((Math.random() - 0.5) / (0.5 * Math.sqrt(otherNodeNo)))//coefficients
-		
-		}
-		
-		teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i].push(Math.random() - 0.5)//const term
-	}
-
-	teamOwnBrain.push({
-		ownNodeMatrix: []})
-	
-	teamOwnBrain[x].ownNodeMatrix.push([])
-
-	for (let j = 0; j < ownNodeNo; j += 1){//fills first layer of teamOwnBrain[x].ownNodeMatrix
-
-		teamOwnBrain[x].ownNodeMatrix[0].push([])
-		
-		for (let k = 0; k < ownInputNo; k += 1){
-		
-			teamOwnBrain[x].ownNodeMatrix[0][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownInputNo))) //coefficients
-		
-		}
-		
-		teamOwnBrain[x].ownNodeMatrix[0][j].push(Math.random() - 0.5)//const term
-	}
-
-	for (let i = 1; i < ownHiddenLayerNo; i += 1){//fills additional hidden layers of teamOwnBrain[x].ownNodeMatrix IMPORTANT has to be layer (i.e. column) then number (i.e. row) so that each full layer is computed before the next layer starts.
-
-		teamOwnBrain[x].ownNodeMatrix.push([])
-
-		for (let j = 0; j < ownNodeNo; j += 1){//fills first layer of teamOwnBrain[x].ownNodeMatrix
-
-			teamOwnBrain[x].ownNodeMatrix[i].push([])
-			
-			for (let k = 0; k < ownNodeNo; k += 1){
-			
-				teamOwnBrain[x].ownNodeMatrix[i][j].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownNodeNo))) //coefficients
-			
-			}
-			
-			teamOwnBrain[x].ownNodeMatrix[i][j].push(Math.random() - 0.5)//const term
-		}
-	}
-
-	teamOwnBrain[x].ownNodeMatrix.push([])
-
-	for (let i = 0; i < ownOutputNo; i += 1){//fills final layer of teamOwnBrain[x].ownNodeMatrix i.e. outputs. // ouput[0] = dig, output[1] = dig location, output[2] = build, output[3] = build location, output [4] = nothing, output[5] = top move, output[6] = left move
-		
-		teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo].push([])
-		
-		for (let j = 0; j < ownNodeNo; j += 1){
-		
-			teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push((Math.random() - 0.5) / (0.5 * Math.sqrt(ownNodeNo)))//coefficients
-		
-		}
-		
-		teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i].push(Math.random() - 0.5)//const term
-	}
-}
-
 function initializer(){
-
-	for (let i = 0; i < teamNo; i += 1){
-
-		teamValue.push(0)
-
-	}
-
-	soilHealth = initialSoilHealth
-	soilFood = initialSoilFood
-	health = initialHealth
-	foodStack = initialFoodStack
-	
-	soilMatrix = []
-	
-	antMatrix = []
-	idMax = []
-	topVar = []
-	leftVar = []
-	eggList = []
-	queen = []
-
-	totalAntNo = 0
-	lastTeam = -1
-	
-	//brain node matrices reset in the initializer (for first round of training)
-	
-	otherInputNo = 16
-	otherNodeNo = 8
-	otherHiddenLayerNo = 1
-	otherOutputNo = 3
-	teamOtherBrain = []
-	
-	ownInputNo = 19
-	ownNodeNo = Math.round((ownInputNo + ownOutputNo) / 2)
-	ownHiddenLayerNo = 1
-	ownOutputNo = ownOutputNo = 10// ouput[0] = dig, output[1] = dig top, output[2] = dig left, output[3] = build, output[4] = build top, output[5] = build left, output[6] = collect food amount, output[7]  = nothing, output[8] = top move, output[9] = left move
-	teamOwnBrain = []
-
-	for (let i = 0; i < soilNoDown; i += 1){
-
-		soilMatrix.push([])
-		
-	}
-
-	function soilGenerator(a, b){//invoke at beginning of simulation. b = number across. a = number down.
-
-			soilMatrix[a].push({ //soil object
-			health: soilHealth[a][b],
-			food: soilFood[a][b]
-			})
-			
-	}
-
-	for (let i = 0; i <	soilNoDown; i += 1){
-
-		for (let j = 0; j <	soilNoAcross; j += 1){
-
-			soilGenerator(i,j)
-			if(dom == 1){
-				dom1SoilGenerator(i,j)//exclude when training
-			}
-		}
-	}
-
-	//END OF SOIL
-
-	//ANTS
-
-	for (let i = 0; i < antTypeNo; i += 1){
-
-		antMatrix.push([])
-		idMax.push(0)
-		topVar.push([])
-		leftVar.push([])
-		queen.push(0)
-
-	}
-
-	for (let i = 0; i < antTypeNo; i += 1){
-
-		queenGenerator(i)
-
-		for (let j = 0; j < teamNo; j += 1){
-
-			antGenerator(i,10,j)
-
-		}
-	}
-
-	//ANT BRAIN
-
-	//could create different brains for different ant types, or just include ant stats as brain inputs. could create individual ant brains unique to each one.
-
-	for (let x = 0; x < teamNo; x += 1){
-
-		brainGenerator(x)
-
-	}	
-}
-
-function outitializer(){
 
 	for (let i = 0; i < teamNo; i += 1){
 
@@ -366,19 +151,28 @@ function outitializer(){
 	totalAntNo = 0
 	lastTeam = -1
 	
-	//brain node matrices reset in the initializer (for first round of training)
-	
-	otherInputNo = 16
-	otherNodeNo = 8
-	otherHiddenLayerNo = 1
-	otherOutputNo = 3
+
 	teamOtherBrain = []
 	
-	ownInputNo = 19
-	ownNodeNo = Math.round((ownInputNo + ownOutputNo) / 2)
-	ownHiddenLayerNo = 1
-	ownOutputNo = ownOutputNo = 10// ouput[0] = dig, output[1] = dig top, output[2] = dig left, output[3] = build, output[4] = build top, output[5] = build left, output[6] = collect food amount, output[7]  = nothing, output[8] = top move, output[9] = left move
+	// ouput[0] = dig, output[1] = dig top, output[2] = dig left, output[3] = build, output[4] = build top, output[5] = build left, output[6] = collect food amount, output[7]  = nothing, output[8] = top move, output[9] = left move
 	teamOwnBrain = []
+
+	for (let i = 0; i < teamNo; i += 1){
+
+		teamOtherBrain.push({
+			aggresion: [0,0,0,0],
+			feed: [0,0,0,0],
+
+		})
+		teamOwnBrain.push({
+			top: 0,
+			left: 0,
+
+		})
+
+	}
+
+	//SOIL
 
 	for (let i = 0; i < soilNoDown; i += 1){
 
@@ -430,24 +224,14 @@ function outitializer(){
 
 		}
 	}
+}
 
-	//ANT BRAIN
+function brainUpdater(){
 
-	//could create different brains for different ant types, or just include ant stats as brain inputs. could create individual ant brains unique to each one.
-
-	for (let x = 0; x < teamNo - 1; x += 1){
-
-		brainGenerator(x)
-
-	}	
-
-	teamOtherBrain.push([])
-	teamOtherBrain[3].otherNodeMatrix = bestOtherNodeMatrix
-
-	teamOwnBrain.push([])
-	teamOwnBrain[3].ownNodeMatrix = bestOwnNodeMatrix
+	//if manual updates to brain parameters
 
 }
+
 
 let otherAntBrainTime = 0
 let ownAntBrainTime = 0
@@ -459,7 +243,6 @@ let antStarveTime = 0
 let antRemoveTime = 0
 let antAttackTime = 0
 let antCollisionTime = 0
-
 
 function antFunction(){
 
@@ -606,85 +389,21 @@ function antFunction(){
 		input.push(antMatrix[c][d].foodStack)
 		input.push(Math.random())
 
+		//calculate an 'output' string, to be converted to choices, based on inputs and teamOtherBrain[x]
 		
-		for (let i = 0; i < collisionList.length; i += 2){//collision counter
-		
-			if (collisionList[i] == a && collisionList[i+1] == b){
+		if (0>1){
 			
-				input[0] += 1
-		
-			}
-		}
-		
-		//hidden layers
-		
-		let otherNodeOutputs = []
-		
-		otherNodeOutputs.push([])
-		
-		for (let j = 0; j < otherNodeNo; j += 1){//computes first layer of node values. create a larger first layer????
-			
-			otherNodeOutputs[0].push(0)
-			
-			for (let k = 0; k < otherInputNo; k += 1){//adds regressor terms
-			
-				otherNodeOutputs[0][j] += teamOtherBrain[x].otherNodeMatrix[0][j][k] * input[k]
-			
-			}
-			
-			otherNodeOutputs[0][j] += teamOtherBrain[x].otherNodeMatrix[0][j][otherInputNo]//adds constant term
-		}	
-				
-		
-		for (let i = 1; i < otherHiddenLayerNo; i += 1){//computes consecutive layers of hidden node values
-		
-			otherNodeOutputs.push([])
-			
-			for (let j = 0; j < otherNodeNo; j += 1){
-			
-				otherNodeOutputs[i].push(0)
-			
-				for (let k = 0; k < otherNodeNo; k += 1){
-			
-					otherNodeOutputs[i][j] += teamOtherBrain[x].otherNodeMatrix[i][j][k] * otherNodeOutputs[i-1][k]
-					
-				}
-				
-				otherNodeOutputs[i][j] += teamOtherBrain[x].otherNodeMatrix[i][j][otherNodeNo]
-				
-			}
-		}
-		
-		otherNodeOutputs.push([])
-		
-		for (let i = 0; i < otherOutputNo; i += 1){//computes final (output) layer of node values.
-		
-			otherNodeOutputs[otherHiddenLayerNo].push(0)
-			
-			for (let j = 0; j < otherNodeNo; j += 1){//adds regressor terms
-			
-				otherNodeOutputs[otherHiddenLayerNo][i] += teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i][j] * otherNodeOutputs[otherHiddenLayerNo - 1][j]//how to select inout variables?
-				
-			}
-			
-			otherNodeOutputs[otherHiddenLayerNo][i] += teamOtherBrain[x].otherNodeMatrix[otherHiddenLayerNo][i][otherNodeNo]//adds constant term
-		}	
-	
-	//outputs
-		
-		if (otherNodeOutputs[otherHiddenLayerNo][0] > otherNodeOutputs[otherHiddenLayerNo][1] && otherNodeOutputs[otherHiddenLayerNo][0] > otherNodeOutputs[otherHiddenLayerNo][2]){
-		
-			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][0])//value of output
+			otherChoice.push(0)//value of output
 			otherChoice.push(0)//output choice (attack)
 		
-		} else if (otherNodeOutputs[otherHiddenLayerNo][1] > otherNodeOutputs[otherHiddenLayerNo][2]){
-		
-			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][1])//value of output
+		} else if (0>1){
+
+			otherChoice.push(0)//value of output
 			otherChoice.push(1)//output choice (feed)
 		
 		} else {
 		
-			otherChoice.push(otherNodeOutputs[otherHiddenLayerNo][2])//value of output
+			otherChoice.push(0)//value of output
 			otherChoice.push(2)//output choice (do nothing)
 		
 		}
@@ -790,91 +509,31 @@ function antFunction(){
 		
 			}
 		}
+			
+		//create output string to convert to choices below.
 		
-		//hidden layers
-		
-		let ownNodeOutputs = []
-		
-		ownNodeOutputs.push([])
-		
-		for (let j = 0; j < ownNodeNo; j += 1){//computes first layer of node values. create a larger first layer????
-			
-			ownNodeOutputs[0].push(0)
-			
-			for (let k = 0; k < ownInputNo; k += 1){//adds regressor terms
-			
-				ownNodeOutputs[0][j] += teamOwnBrain[x].ownNodeMatrix[0][j][k] * input[k]
-			
-			}
-			
-			ownNodeOutputs[0][j] += teamOwnBrain[x].ownNodeMatrix[0][j][ownInputNo]//adds constant term
-		}	
-				
-		
-		for (let i = 1; i < ownHiddenLayerNo; i += 1){//computes consecutive layers of hidden node values
-		
-			ownNodeOutputs.push([])
-			
-			for (let j = 0; j < ownNodeNo; j += 1){
-			
-				ownNodeOutputs[i].push(0)
-			
-				for (let k = 0; k < ownNodeNo; k += 1){
-			
-					ownNodeOutputs[i][j] += teamOwnBrain[x].ownNodeMatrix[i][j][k] * ownNodeOutputs[i-1][k]
-					
-				}
-				
-				ownNodeOutputs[i][j] += teamOwnBrain[x].ownNodeMatrix[i][j][ownNodeNo]
-				
-			}
-		}
-		
-		ownNodeOutputs.push([])
-		
-		for (let i = 0; i < ownOutputNo; i += 1){//computes final (output) layer of node values.
-		
-			ownNodeOutputs[ownHiddenLayerNo].push(0)
-			
-			for (let j = 0; j < ownNodeNo; j += 1){//adds regressor terms
-			
-				ownNodeOutputs[ownHiddenLayerNo][i] += teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i][j] * ownNodeOutputs[ownHiddenLayerNo - 1][j]//how to select inout variables?
-				
-			}
-			
-			ownNodeOutputs[ownHiddenLayerNo][i] += teamOwnBrain[x].ownNodeMatrix[ownHiddenLayerNo][i][ownNodeNo]//adds constant term
-		}	
-	
-	//outputs
-		
-		if (ownNodeOutputs[ownHiddenLayerNo][0] > Math.max(ownNodeOutputs[ownHiddenLayerNo][3], ownNodeOutputs[ownHiddenLayerNo][6], ownNodeOutputs[ownHiddenLayerNo][7])){
-		
-			ownChoice[a][b].push(ownNodeOutputs[ownHiddenLayerNo][1], ownNodeOutputs[ownHiddenLayerNo][2])//position of dig
+		if (0>1){
+			ownChoice[a][b].push(0, 0)//position of dig (-ve or +ve)
 			ownChoice[a][b].push(0)//output choice
 		
-		} else if (ownNodeOutputs[ownHiddenLayerNo][3] > Math.max(ownNodeOutputs[ownHiddenLayerNo][6], ownNodeOutputs[ownHiddenLayerNo][7])){
-		
-			ownChoice[a][b].push(ownNodeOutputs[ownHiddenLayerNo][4], ownNodeOutputs[ownHiddenLayerNo][5])//position of build
+		} else if (0>1){
+			ownChoice[a][b].push(0, 0)//position of build (-ve or +ve)
 			ownChoice[a][b].push(1)//output choice
 		
-		} else if (ownNodeOutputs[ownHiddenLayerNo][6] > ownNodeOutputs[ownHiddenLayerNo][7]){
-		
-			ownChoice[a][b].push(0, 2 * ((1 / (1 + Math.exp(- 2 * ownNodeOutputs[ownHiddenLayerNo][6]))) - 0.5))//food collect multiplier, sigmoid function normalises output to between -1 and 1. Including "2" since output is usually too close to zero otherwise.	
+		} else if (0>1){
+			ownChoice[a][b].push(0, 0)//food collect multiplier, sigmoid function normalises output to between -1 and 1. Including "2" since output is usually too close to zero otherwise.	
 			ownChoice[a][b].push(2)//output choice
 
 		} else {
 			
-			ownChoice[a][b].push(0, ownNodeOutputs[ownHiddenLayerNo][7])//value of nothing output
+			ownChoice[a][b].push(0, 0)//value of nothing output
 			ownChoice[a][b].push(3)//output choice
 		
 		}
 		
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 2 * ownNodeOutputs[ownHiddenLayerNo][8]))) - 0.5))//top move output, sigmoid function normalises output to between -1 and 1. Including "2" since output is usually too close to zero otherwise.
-		ownChoice[a][b].push(2 * ((1 / (1 + Math.exp(- 2 * ownNodeOutputs[ownHiddenLayerNo][9]))) - 0.5))//left move output, sigmoid function normalises output to between -1 and 1. Including "2" since output is usually too close to zero otherwise.
+		ownChoice[a][b].push(0) //top move output (-1 : 1)
+		ownChoice[a][b].push(0) //left move output(-1 : 1)
 		
-		
-	//document.getElementById("para2").innerHTML = ownChoice[0][0] //exclude when training
-	
 	}
 
 	let ownAntBrainStart = performance.now()
@@ -1291,16 +950,12 @@ function antFunction(){
 	}
 }
 
-
-let bestOtherNodeMatrix = []
-let bestOwnNodeMatrix = []
-
 function play(){
 
-	bestOtherNodeMatrix = []
-	bestOwnNodeMatrix = []
+
 	let winningValue = 0
 	let winningTickNo = 0
+	let winningTeam = 0
 
 	const playStart = performance.now()
 
@@ -1322,8 +977,7 @@ function play(){
 		if (bestValue > winningValue){
 
 			winningValue = bestValue
-			bestOtherNodeMatrix = teamOtherBrain[bestTeam].otherNodeMatrix
-			bestOwnNodeMatrix = teamOwnBrain[bestTeam].ownNodeMatrix
+			winningTeam = bestTeam
 
 		}
 
@@ -1351,6 +1005,7 @@ function play(){
 	console.log("winningValue", winningValue)
 	console.log("winningTickNo", winningTickNo)
 
+	document.getElementById("para2").innerHTML = "Winner is Team " + lastTeam + "or" + winningTeam
 }
 
 play()// replace with dom2Testing() for viewing
