@@ -1,4 +1,4 @@
-//To do:
+//To dooooooooooooooo:
 //modify other ant brain so only one other regarding act can be performed per ant per tick?
 //create cooperative inputs for brains; leave soil scents,
 //ants drop food when they die functionality (what happens if this would exceed soil max food?)- include other ant foodstack in inputs
