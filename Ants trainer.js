@@ -21,7 +21,7 @@ let foodDeclineRate = 1.25//rate at which total simulation food disappears. 1 = 
 
 //EXPORTS
 
-export { initializer, outitializer, antFunction, antGenerator, antMatrix, antTypeNo, topVar, leftVar, soilFood, soilNoDown, soilNoAcross, soilMatrix, idMax, foodStack, soilHealth, soilHealthMax, soilFoodMax, soilDistFromTop, speedMax, healthMax, foodStackMax, teamNo, speed, health, attackAbility, digAbility, buildAbility, starveRate, eatRate, collectRate}
+export { initializer, antFunction, antGenerator, antMatrix, antTypeNo, topVar, leftVar, soilFood, soilNoDown, soilNoAcross, soilMatrix, idMax, foodStack, soilHealth, soilHealthMax, soilFoodMax, soilDistFromTop, speedMax, healthMax, foodStackMax, teamNo, speed, health, attackAbility, digAbility, buildAbility, starveRate, eatRate, collectRate}
 //IMPORTS
 //Seed.js parameters
 
@@ -1008,5 +1008,5 @@ function play(){
 	document.getElementById("para2").innerHTML = "Winner is Team " + lastTeam + "or" + winningTeam
 }
 
-play()// replace with dom2Testing() for viewing
+//play()// replace with dom2Testing() for viewing
 dom2Testing()//exclude when training

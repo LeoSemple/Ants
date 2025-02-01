@@ -1,4 +1,4 @@
-import {initializer, outitializer, antGenerator, antFunction, antMatrix, antTypeNo, topVar, leftVar, soilMatrix, soilNoDown, soilNoAcross, soilHealthMax} from "./Ants trainer.js"
+import {initializer, antGenerator, antFunction, antMatrix, antTypeNo, topVar, leftVar, soilMatrix, soilNoDown, soilNoAcross, soilHealthMax} from "./Ants trainer.js"
 export let dom = 0
 
 export function dom2Move(){
@@ -51,7 +51,7 @@ export function dom2Testing(){
 	function playDom(){
 
         dom = 1
-        outitializer()
+        initializer()
 	    setInterval(antFunction, 1000)
 	
     }
