@@ -1,6 +1,6 @@
 //functionality for adding / removing rows as ants are created or die
 
-import {antMatrix, antTypeNo} from "./Ants trainer"
+import {antMatrix, antTypeNo} from "./Ants trainer.js"
 
 
 
