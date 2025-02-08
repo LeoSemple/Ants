@@ -7,6 +7,13 @@
 //vary more ant parameters - starve rate, carry capacity...
 //add other brain outputs to ownBrain inputs.
 
+//types (0:9)
+//aggression (0,1,2,3), dig, build, foodcollect max min, feed others, move to pointer, move away
+//
+//pointer, right click left click
+//WASD queen
+//keyboard shortcuts - only idle ants follow/flee pointer unless a keyboard or window button overide pressed
+
 
 //ant sight?
 //queen ant
@@ -21,7 +28,7 @@ let foodDeclineRate = 1.25//rate at which total simulation food disappears. 1 = 
 
 //EXPORTS
 
-export { initializer, antFunction, antGenerator, antMatrix, antTypeNo, topVar, leftVar, soilFood, soilNoDown, soilNoAcross, soilMatrix, idMax, foodStack, soilHealth, soilHealthMax, soilFoodMax, soilDistFromTop, speedMax, healthMax, foodStackMax, teamNo, speed, health, attackAbility, digAbility, buildAbility, starveRate, eatRate, collectRate}
+export {initializer, antFunction, antGenerator, antMatrix, antTypeNo, topVar, leftVar, soilFood, soilNoDown, soilNoAcross, soilMatrix, idMax, foodStack, soilHealth, soilHealthMax, soilFoodMax, soilDistFromTop, speedMax, healthMax, foodStackMax, teamNo, speed, health, attackAbility, digAbility, buildAbility, starveRate, eatRate, collectRate}
 //IMPORTS
 //Seed.js parameters
 

@@ -23,11 +23,42 @@ Ant Generator:
 				
 <input type="button" id = "generatorButton" value="Generate"><br>
 
+<table id = "controlTable">
+    <tr>
+        <th>Type</th>
+        <th>No.</th>
+        <th>commands</th>
+        <th>stats set before game(or have as a mouseeover instead?)</th>
+        <th>l</th>
+    </tr>
+</table>
+
+
+
+
+<form>
+    <input type="checkbox" id="dig0" name="dig0" value="Yes">
+    <label for="dig0">Auto dig</label>
+    <input type="checkbox" id="build0" name="build0" value="Yes">
+    <label for="build0">Auto build</label>
+    <input type="checkbox" id="attack0" name="attack0" value="Yes">
+    <label for="attack0">Auto attack</label> 
+    <input type="checkbox" id="flee0" name="flee0" value="Yes">
+    <label for="flee0">Auto flee</label><br>
+    <input type="checkbox" id="dig1" name="dig1" value="Yes">
+    <label for="dig1">Auto dig</label>
+    <input type="checkbox" id="build1" name="build1" value="Yes">
+    <label for="build1">Auto build</label>
+    <input type="checkbox" id="attack1" name="attack1" value="Yes">
+    <label for="attack1">Auto attack</label> 
+    <input type="checkbox" id="flee1" name="flee1" value="Yes">
+    <label for="flee1">Auto flee</label><br>
+
+    <input type="submit" value="Update">
+</form> 
+
 <script type = "module" src = "Ants trainer.js"></script>
-			
-
-
-
+<script type = "module" src = "Interface.js"></script>
 
 </body>
 
