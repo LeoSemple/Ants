@@ -1,13 +1,13 @@
 //functionality for adding / removing rows as ants are created or die
 
-import {antMatrix, antTypeNo} from "./Ants trainer"
+import {antMatrix, antTypeNo} from "./Ants trainer.js"
 
 
 
 //create initial ant creator with sliders - preset to types and names
 //perhaps seperate table with tbody and thead
 
-let rowNo = antTypeNo + 1
+let rowPosition = 0
 let colNo = 5
 let row = []
 let expanded = []// 0 = currently hidden, 1 = currently expanded
@@ -20,16 +20,22 @@ for(let i = 0; i < antTypeNo; i += 1){
 
 function show(a){//set so that collapsing the top row collapses BOTH sublayers, and expanding only expands the first layer
 
+    let rowDist = 1
+
+    for (let i = 0; i < a; i += 1){
+        rowDist += antMatrix[i].length + 1
+    }
+
     if (expanded[a] == 0){
 
-        for (let i = 0; i < antMatrix[a].length; i += 1){
+        for (let i = rowDist; i < antMatrix[a].length + rowDist; i += 1){
             //.show(row[i])
         }
         expanded[a] = 1
 
     }else{
         
-        for (let i = a; i < antMatrix[a].length; i += 1){
+        for (let i = rowDist; i < antMatrix[a].length + rowDist; i += 1){
             //.hide(row[i])
         }
         expanded[a] = 0
@@ -40,8 +46,7 @@ function show(a){//set so that collapsing the top row collapses BOTH sublayers, 
 
 for (let i = 0; i < antTypeNo; i += 1){
 
-    row.push(0)
-    row[i] = document.createElement("tr")
+    row.push(document.createElement("tr"))
 
     let cell = []
 
@@ -73,8 +78,18 @@ for (let i = 0; i < antTypeNo; i += 1){
     cell[4].setAttribute("id", "flee" + i + ",total")
     cell[4].setAttribute("value", "Yes")
 
+    for (let j = 0; j < colNo; j += 1){
+
+        row[rowPosition].appendChild(cell[j])
+
+    }
+
+    document.getElementById("controlTable").appendChild(row[rowPosition])
+    rowPosition += 1
+
     for (let j = 0; j < antMatrix[i].length; j += 1){
 
+        row.push(document.createElement("tr"))
         let cell1 = []
 
         for (let j = 0; j < colNo; j += 1){
@@ -101,18 +116,12 @@ for (let i = 0; i < antTypeNo; i += 1){
         
         for (let k = 0; k < colNo; k += 1){
 
-            row[j].appendChild(cell1[k])
+            row[rowPosition].appendChild(cell1[k])
     
         }
 
+        document.getElementById("controlTable").appendChild(row[rowPosition])
+        rowPosition += 1
+       
     }
-
-    for (let j = 0; j < colNo; j += 1){
-
-        row[i].appendChild(cell[j])
-
-    }
-
-    document.getElementById("controlTable").appendChild(row[i])
-
 }
